@@ -76,11 +76,6 @@ class swarm():
         self.c = 1/eta
 
     def predict(self, x, task):
-        '''v = (self.pi*self.W[task])/(self.pi @ self.W[task])
-        d0 = -self.c*np.log(np.exp(-self.eta*L(0,x)) @ v)
-        d1 = -self.c*np.log(np.exp(-self.eta*L(1,x)) @ v)
-        return 0.5*(np.sqrt(d0) + 1 - np.sqrt(d1))'''
-        
         v = (self.pi*self.W[task])/(self.pi @ self.W[task])
         return v @ x
 
@@ -154,20 +149,6 @@ class experiment:
             print(f"exp: {len(new_exp)}")
         experts = np.asarray(experts)
         return experts
-
-#for index, task_mode_list in enumerate(task_modes):
-#    print(task_mode_list)
-#    unchecked = True
-#    while unchecked:
-#        random.shuffle(task_mode_list)
-#        for x in range(len(task_mode_list)-1):
-#            if task_mode_list[x] == task_mode_list:
-#                if index==(len(task_modes)-1):
-#                    return expert_matrix()
-#                continue
-#        unchecked = False
-#    experts[index] = task_mode_list
-    #print(task_mode_list)
 
     def experiment_data(self, uniform=True, p=0):
         per_task_switches = int(self.k/self.s)

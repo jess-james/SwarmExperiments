@@ -87,6 +87,7 @@ class swarm():
         self.pi = self.pi*epsilon
         self.W[task] = (self.phi*(1-self.W[task]) + self.theta*beta*delta)*(1/epsilon)
 
+#Shuffles order of experts
 def rearrange(m,k,s):
     mode_list = [i%m for i in range(int((k+1)* s))]
     count = Counter(mode_list)
@@ -198,9 +199,6 @@ class experiment:
             current_task = task_vector[t]
             current_t = local_t[current_task]
             local_t[current_task] +=1
-            #current_mode = local_mode[current_task]
-            #if(current_t in switches[current_task]) and not current_t==0:
-            #        local_mode[current_task] +=1
             current_expert = experts[int(current_task)][current_t]
             #print(f"Current task: {current_task}, local_time: {current_t}, mode: {current_mode}")
             X[t, current_expert] = Y[t] * np.random.uniform(0.85, 1) + (1-Y[t])*np.random.uniform(0, 0.15)
@@ -209,7 +207,6 @@ class experiment:
     def step(self,tau):
             task = self.task_vector[tau]
             t = self.local_t[task]
-            #print(str(task)+":"+str(t))
             if t in switches[task] and t!=0:
                 self.local_k[task]+=1
             k = self.local_k[task]
@@ -270,13 +267,11 @@ def run_experiments(s, m, k, eta):
 
             if t==0:
                 losses['Average Expert'].loc[t, task] = np.sum(L(X[tau, task], Y[tau]))/num_experts #losses[learner_names[key]].loc[t-1, task] + L(Y[tau], y_hat) if t>0  else L(Y[tau], y_hat)
-                #losses['Average Expert'].loc[t, task] = losses['Average Expert'].loc[t-1, task] + (np.mean([L(X[tau][i],Y[tau]) for i in range(num_experts)])) #losses[learner_names[key]].loc[t-1, task] + L(Y[tau], y_hat) if t>0  else L(Y[tau], y_hat)
                 losses['Best Partition'].loc[t, task] = np.min([L(X[tau][i],Y[tau]) for i in range(num_experts)])
                 for exp in range(num_experts):
                     exploss[exp].loc[t,task] = L(X[tau][exp], Y[tau])
             else:
                 losses['Average Expert'].loc[t, task] = losses['Average Expert'].loc[t-1, task] + np.sum(L(X[tau], Y[tau]))/num_experts #losses[learner_names[key]].loc[t-1, task] + L(Y[tau], y_hat) if t>0  else L(Y[tau], y_hat)
-                #losses['Average Expert'].loc[t, task] = losses['Average Expert'].loc[t-1, task] + (np.mean([L(X[tau][i],Y[tau]) for i in range(num_experts)])) #losses[learner_names[key]].loc[t-1, task] + L(Y[tau], y_hat) if t>0  else L(Y[tau], y_hat)
                 losses['Best Partition'].loc[t, task] = losses['Best Partition'].loc[t-1, task] + np.min([L(X[tau],Y[tau]) for i in range(num_experts)])
                 for exp in range(num_experts):
                     exploss[exp].loc[t,task] = L(X[tau][exp], Y[tau]) + exploss[exp].loc[t-1,task]
